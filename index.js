@@ -1,7 +1,7 @@
 import express from "express";
-import http from "http";
-import { createServer } from 'node:http';
-import { Server } from "socket.io";
+// import http from "http";
+// import { createServer } from 'node:http';
+// import { Server } from "socket.io";
 import bodyParser from "body-parser";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -19,14 +19,15 @@ dotenv.config();
 const app = express();
 // const server = http.createServer(app);
 
-const server = createServer(app);
-const io = new Server(server, {
-    cors: {
-        origin: "http://localhost:3000"
-    },
-});
+// const server = createServer(app);
+// const io = new Server(server, {
+//     cors: {
+//         origin: "http://localhost:3000"
+//     },
+// });
 
 // Apply middleware
+
 app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
 app.use(express.json());
 app.use(bodyParser.json({ extended: true }));
@@ -47,18 +48,18 @@ app.use(passport.session());
 
 connectToDatabase(process.env.MONGO_URL);
 
-io.on('connection', (socket) => {
-    console.log('a user connected');
+// io.on('connection', (socket) => {
+//     console.log('a user connected');
 
-    socket.on('chat message', (userId) => {
-        console.log('userID: ', userId);
-        io.emit('chat message' ,userId);
-    });
+//     socket.on('chat message', (userId) => {
+//         console.log('userID: ', userId);
+//         io.emit('chat message' ,userId);
+//     });
 
-    socket.on('disconnect', () => {
-        console.log('User disconnected');
-    });
-});
+//     socket.on('disconnect', () => {
+//         console.log('User disconnected');
+//     });
+// });
 
 // Routers
 app.use('/auth', authRouter);
