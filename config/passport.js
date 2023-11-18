@@ -60,6 +60,8 @@ passport.use(
             try {
                 const user = await User.findOne({ email: defaultUser.email });
 
+                console.log(user);
+
                 if (!user) {
                     const newUser = await User.create(defaultUser);
                     cb(null, newUser);
