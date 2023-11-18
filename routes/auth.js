@@ -80,6 +80,8 @@ router.get(
 router.get("/verify", async (req, res) => {
     try {
         // if (req.isAuthenticated()) {
+
+        console.log(req.user);
         if (req.user) {
             const userId = req.user._id;
 
