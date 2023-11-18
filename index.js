@@ -19,16 +19,17 @@ dotenv.config();
 const app = express();
 // const server = http.createServer(app);
 
+const origin = process.env.CLIENT_URL
 const server = createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:3000"
+        origin: origin
     },
 });
 
 // Apply middleware
 
-app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
+app.use(cors({ credentials: true, origin: origin }));
 app.use(express.json());
 app.use(bodyParser.json({ extended: true }));
 app.use(bodyParser.urlencoded({ extended: true }));
