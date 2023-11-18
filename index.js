@@ -29,7 +29,13 @@ const io = new Server(server, {
 
 // Apply middleware
 
-app.use(cors({ credentials: true, origin: origin }));
+const corsOptions = {
+    origin: origin,
+    credentials: true,
+};
+
+// app.use(cors({ credentials: true, origin: origin }));
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(bodyParser.json({ extended: true }));
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -54,7 +60,7 @@ io.on('connection', (socket) => {
 
     socket.on('chat message', (userId) => {
         console.log('userID: ', userId);
-        io.emit('chat message' ,userId);
+        io.emit('chat message', userId);
     });
 
     socket.on('disconnect', () => {
