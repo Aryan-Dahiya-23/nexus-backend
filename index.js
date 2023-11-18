@@ -29,29 +29,42 @@ const io = new Server(server, {
 
 // Apply middleware
 
-const corsOptions = {
-    origin: origin,
-    credentials: true,
-};
+// app.use(session({
+//     secret: "your-secret",
+//     resave: false,
+//     saveUninitialized: false,
+//     cookie: {
+//         maxAge: 48 * 60 * 60 * 1000,
+//     },
+// }));
 
-// app.use(cors({ credentials: true, origin: origin }));
-app.use(cors(corsOptions));
+app.use(
+    session({
+        secret: "your-secret",
+        resave: false,
+        saveUninitialized: false,
+
+        cookie: {
+            secure: true,
+            httpOnly: true,
+            sameSite: "none"
+            // secure: process.env.NODE_ENV === "development" ? false : true,
+            // httpOnly: process.env.NODE_ENV === "development" ? false : true,
+            // sameSite: process.env.NODE_ENV === "development" ? false : "none",
+        },
+    })
+);
+
+app.use(cors({ credentials: true, origin: origin }));
 app.use(express.json());
 app.use(bodyParser.json({ extended: true }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-app.use(session({
-    secret: "your-secret",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        maxAge: 48 * 60 * 60 * 1000,
-    },
-}));
-
+app.use(passport.authenticate("session"));
 app.use(passport.initialize());
 app.use(passport.session());
+app.enable("trust proxy");
 
 connectToDatabase(process.env.MONGO_URL);
 

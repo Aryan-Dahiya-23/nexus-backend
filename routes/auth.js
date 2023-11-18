@@ -81,9 +81,9 @@ router.get("/verify", async (req, res) => {
     try {
         // if (req.isAuthenticated()) {
 
-        const token = req.cookies["connect.sid"];
-        console.log("token: " ,token);
-        if (req.user) {
+        // const token = req.cookies["connect.sid"];
+        // console.log("token: " ,token);
+        if (req.isAuthenticated()) {
             const userId = req.user._id;
 
             const user = await User.findById(userId)
