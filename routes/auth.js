@@ -79,7 +79,8 @@ router.get(
 
 router.get("/verify", async (req, res) => {
     try {
-        if (req.isAuthenticated()) {
+        // if (req.isAuthenticated()) {
+        if (req.user) {
             const userId = req.user._id;
 
             const user = await User.findById(userId)
@@ -96,7 +97,7 @@ router.get("/verify", async (req, res) => {
             user.messages.sort((a, b) => {
                 const createdAtA = a.lastMessage.lastMessage.createdAt;
                 const createdAtB = b.lastMessage.lastMessage.createdAt;
-                return  createdAtB - createdAtA;
+                return createdAtB - createdAtA;
             });
 
             res.status(200).json({
