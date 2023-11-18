@@ -179,7 +179,7 @@ app.get('/chats/:conversationId', async (req, res) => {
         //     })
         //     .exec();
 
-        const conversation = await Conversation.findById(conversationId)
+        const conversation = await Conversation.findById(conversationId).lean()
             .populate({
                 path: 'participants',
                 model: 'User',
