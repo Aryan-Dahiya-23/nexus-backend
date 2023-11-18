@@ -53,56 +53,110 @@ router.get(
     }
 );
 
-// router.get("/verify", (req, res) => {
-//     try {
-//         if (req.isAuthenticated()) {
-//             res.status(200).json({
-//                 error: false,
-//                 message: "Successfully Logged In",
-//                 user: req.user,
-//             });
-//         } else {
-//             res.status(403).json({
-//                 error: true,
-//                 message: "Not Authorized",
-//                 reason: "User is not authenticated.",
-//             });
-//         }
-//     } catch (error) {
-//         res.status(500).json({
-//             error: true,
-//             message: "Internal Server Error",
-//             reason: "An error occurred while verifying user authentication.",
-//         });
-//     }
-// });
-
 router.get("/verify", async (req, res) => {
     try {
-        // if (req.isAuthenticated()) {
-
-        // const token = req.cookies["connect.sid"];
-        // console.log("token: " ,token);
-        console.log(req.user);
         if (req.isAuthenticated()) {
             const userId = req.user._id;
 
+            // const user = await User.findById(userId)
+            //     .populate({
+            //         path: 'messages.userId',
+            //         select: 'fullName picture',
+            //     })
+            //     .populate({
+            //         path: 'messages.lastMessage',
+            //         select: 'lastMessage.content lastMessage.createdAt',
+            //     })
+            //     .exec();
+
+            // const user = await User.findById(userId);
+
+            // const user = await User.findById(userId)
+            //     .populate({
+            //         path: 'conversations.conversationId',
+            //         populate: {
+            //             path: 'participants',
+            //             model: 'User'
+            //         }
+            //     })
+            //     .exec();
+
+            // const user = await User.findById(userId)
+            //     .populate({
+            //         path: 'conversations.conversationId',
+            //         select: 'participants',
+            //         populate: {
+            //             path: 'participants',
+            //             model: 'User',
+            //         }
+            //     })
+            //     .exec();
+
+            // const user = await User.findById(userId)
+            //     .populate({
+            //         path: 'conversations.conversation',
+            //         select: 'participants',
+            //         populate: {
+            //             path: 'participants',
+            //             model: 'User',
+            //             select: 'fullName picture',
+            //             match: { _id: { $ne: userId } }
+            //         }
+            //     })
+            //     .exec();
+
             const user = await User.findById(userId)
                 .populate({
-                    path: 'messages.userId',
-                    select: 'fullName picture',
-                })
-                .populate({
-                    path: 'messages.lastMessage',
-                    select: 'lastMessage.content lastMessage.createdAt',
+                    path: 'conversations.conversation',
+                    select: 'participants lastMessage',
+                    populate: [
+                        {
+                            path: 'participants',
+                            model: 'User',
+                            select: 'fullName picture',
+                            match: { _id: { $ne: userId } }
+                        },
+                        {
+                            path: 'lastMessage',
+                            model: 'Message',
+                            select: 'content createdAt'
+                        }
+                    ]
                 })
                 .exec();
 
-            user.messages.sort((a, b) => {
-                const createdAtA = a.lastMessage.lastMessage.createdAt;
-                const createdAtB = b.lastMessage.lastMessage.createdAt;
+            // for (let i = 0; i < user.conversations.length; i++) {
+            //     console.log(user.conversations[i].conversation);
+            // }
+
+            // user.conversations.sort((a, b) => {
+            //     const createdAtA = a.conversation.lastMessage.createdAt;
+            //     const createdAtB = b.conversation.lastMessage.createdAt;
+            //     return createdAtB - createdAtA;
+            // });
+
+            user.conversations.sort((a, b) => {
+                const lastMessageA = a.conversation.lastMessage;
+                const lastMessageB = b.conversation.lastMessage;
+
+                if (!lastMessageA && !lastMessageB) {
+                    return 0;
+                }
+
+                if (!lastMessageA) {
+                    return -1;
+                }
+
+                if (!lastMessageB) {
+                    return 1;
+                }
+
+                const createdAtA = lastMessageA.createdAt;
+                const createdAtB = lastMessageB.createdAt;
+
                 return createdAtB - createdAtA;
             });
+
 
             res.status(200).json({
                 error: false,

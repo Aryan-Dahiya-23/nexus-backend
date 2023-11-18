@@ -13,6 +13,7 @@ import authRouter from "./routes/auth.js"
 import "./config/passport.js"
 import User from "./models/User.js";
 import Conversation from "./models/Conversation.js";
+import Message from "./models/Message.js";
 
 dotenv.config();
 
@@ -45,12 +46,9 @@ app.use(
         saveUninitialized: false,
 
         cookie: {
-            secure: true,
-            httpOnly: true,
-            sameSite: "none"
-            // secure: process.env.NODE_ENV === "development" ? false : true,
-            // httpOnly: process.env.NODE_ENV === "development" ? false : true,
-            // sameSite: process.env.NODE_ENV === "development" ? false : "none",
+            secure: process.env.NODE_ENV === "development" ? false : true,
+            httpOnly: process.env.NODE_ENV === "development" ? false : true,
+            sameSite: process.env.NODE_ENV === "development" ? false : "none",
         },
     })
 );
@@ -72,7 +70,7 @@ io.on('connection', (socket) => {
     console.log('a user connected');
 
     socket.on('chat message', (userId) => {
-        console.log('userID: ', userId);
+        console.log('userID of message sent: ', userId);
         io.emit('chat message', userId);
     });
 
@@ -99,13 +97,18 @@ app.post("/create-chat", async (req, res) => {
     try {
         const { senderId, receiverId } = req.body;
 
+        // const newChat = new Conversation({
+        //     participants: [senderId, receiverId],
+        //     messages: [],
+        //     lastMessage: {
+        //         content: "Started The Chat",
+        //         createdAt: Date.now()
+        //     }
+        // });
+
         const newChat = new Conversation({
             participants: [senderId, receiverId],
             messages: [],
-            lastMessage: {
-                content: "Started The Chat",
-                createdAt: Date.now()
-            }
         });
 
         const savedChat = await newChat.save();
@@ -114,10 +117,8 @@ app.post("/create-chat", async (req, res) => {
             { _id: senderId },
             {
                 $push: {
-                    messages: {
-                        userId: receiverId,
-                        conversationId: savedChat._id,
-                        lastMessage: savedChat._id,
+                    conversations: {
+                        conversation: savedChat._id,
                     },
                 },
             }
@@ -127,10 +128,8 @@ app.post("/create-chat", async (req, res) => {
             { _id: receiverId },
             {
                 $push: {
-                    messages: {
-                        userId: senderId,
-                        conversationId: savedChat._id,
-                        lastMessage: savedChat._id,
+                    conversations: {
+                        conversation: savedChat._id,
                     },
                 },
             }
@@ -156,18 +155,49 @@ app.get('/chats/:conversationId', async (req, res) => {
         const { conversationId } = req.params;
         const { userId } = req.query;
 
-        const messages = await Conversation.findById(conversationId)
+        // const messages = await Conversation.findById(conversationId)
+        //     .populate({
+        //         path: 'participants',
+        //         select: 'fullName picture _id',
+        //     })
+        //     .populate({
+        //         path: 'messages.senderId',
+        //         select: 'fullName picture _id',
+        //     })
+        //     .exec();
+
+        // const conversation = await Conversation.findById(conversationId)
+        //     .populate({
+        //         path: 'participants',
+        //         model: 'User',
+        //         select: 'fullName picture',
+        //         match: { _id: { $ne: userId } }
+        //     })
+        //     .populate({
+        //         path: 'messages',
+        //         model: 'Message'
+        //     })
+        //     .exec();
+
+        const conversation = await Conversation.findById(conversationId)
             .populate({
                 path: 'participants',
-                select: 'fullName picture _id',
+                model: 'User',
+                select: 'fullName picture',
+                match: { _id: { $ne: userId } }
             })
             .populate({
-                path: 'messages.senderId',
-                select: 'fullName picture _id',
+                path: 'messages',
+                model: 'Message',
+                populate: {
+                    path: 'senderId',
+                    model: 'User',
+                    select: 'fullName picture',
+                }
             })
             .exec();
 
-        res.json(messages);
+        res.json(conversation);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
@@ -179,18 +209,18 @@ app.post("/createmessage/:conversationId", async (req, res) => {
         const { conversationId } = req.params;
         const { message } = req.body;
 
-        const conversation = await Conversation.findById(conversationId);
-        conversation.messages.push(message);
+        const newMessage = await Message.create(message);
 
-        conversation.lastMessage = {
-            ...message,
-            createdAt: Date.now()
-        };
+        const conversation = await Conversation.findById(conversationId);
+
+        conversation.messages.push(newMessage._id);
+        conversation.lastMessage = newMessage._id;
 
         await conversation.save();
 
         return res.status(200).json({ message: "Message created successfully" });
     } catch (error) {
+        console.log(error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 })
