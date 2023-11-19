@@ -70,9 +70,8 @@ connectToDatabase(process.env.MONGO_URL);
 io.on('connection', (socket) => {
     console.log('a user connected');
 
-    socket.on('chat message', (userId) => {
-        console.log('userID of message sent: ', userId);
-        io.emit('chat message', userId);
+    socket.on('chat message', (userId, newMessage, conversationId) => {
+        io.emit('chat message', userId, newMessage, conversationId);
     });
 
     socket.on('disconnect', () => {
