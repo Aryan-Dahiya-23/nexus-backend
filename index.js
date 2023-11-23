@@ -77,6 +77,10 @@ io.on('connection', (socket) => {
         io.emit('chat message', userId, newMessage, conversationId);
     });
 
+    socket.on('seen message', (conversationId) => {
+        io.emit('seen message', conversationId);
+    })
+
     socket.on('disconnect', () => {
 
         const userId = connectedUsers.get(socket.id);

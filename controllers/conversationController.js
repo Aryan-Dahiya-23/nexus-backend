@@ -23,6 +23,11 @@ export const getConversation = async (req, res) => {
                     select: 'fullName picture',
                 }
             })
+            .populate({
+                path: 'lastMessage',
+                model: 'Message',
+                select: 'content senderId seenBy'
+            })
             .exec();
 
         res.json(conversation);
@@ -108,8 +113,8 @@ export const readMessages = async (req, res) => {
 
         const conversation = await Conversation.findById(conversationId);
         const message = await Message.findById(conversation.lastMessage);
-    
-        if (String(message.senderId) !== String(userId) && !message.seenBy.includes(String(userId)) ) {
+
+        if (String(message.senderId) !== String(userId) && !message.seenBy.includes(String(userId))) {
             message.seenBy.push(userId);
             await message.save();
         }
