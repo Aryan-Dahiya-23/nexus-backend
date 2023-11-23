@@ -100,3 +100,24 @@ export const createMessage = async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 }
+
+export const readMessages = async (req, res) => {
+    try {
+        const { conversationId } = req.params;
+        const { userId } = req.body;
+
+        const conversation = await Conversation.findById(conversationId);
+        const message = await Message.findById(conversation.lastMessage);
+    
+        if (String(message.senderId) !== String(userId) && !message.seenBy.includes(String(userId)) ) {
+            message.seenBy.push(userId);
+            await message.save();
+        }
+        console.log(message.seenBy);
+
+        res.status(200).json({ message });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+}

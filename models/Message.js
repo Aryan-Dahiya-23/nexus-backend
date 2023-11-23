@@ -15,15 +15,7 @@ const messageSchema = new mongoose.Schema({
         enum: ['text', 'media'],
         default: 'text',
     },
-    readBy: [{
-        user: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',
-        },
-        readAt: {
-            type: Date,
-        },
-    }],
+    seenBy: [],
     createdAt: {
         type: Date,
         default: Date.now,
