@@ -55,16 +55,40 @@ app.enable("trust proxy");
 
 connectToDatabase(process.env.MONGO_URL);
 
+const connectedUsers = new Map();
+
+const sendConnectedUsersToClients = () => {
+    const connectedUserIds = Array.from(connectedUsers.values());
+    io.emit('connected users', connectedUserIds);
+};
+
 io.on('connection', (socket) => {
-    // console.log('a user connected');
+    console.log('a user connected');
+
+    socket.on('user connected', (userId) => {
+        // console.log(`User with ID ${userId} connected`);
+        connectedUsers.set(socket.id, userId);
+        sendConnectedUsersToClients();
+
+        console.log(connectedUsers);
+    });
 
     socket.on('chat message', (userId, newMessage, conversationId) => {
         io.emit('chat message', userId, newMessage, conversationId);
     });
 
     socket.on('disconnect', () => {
-        // console.log('User disconnected');
+
+        const userId = connectedUsers.get(socket.id);
+        if (userId) {
+            // console.log(`User with ID ${userId} disconnected`);
+            connectedUsers.delete(socket.id);
+            console.log(connectedUsers);
+            sendConnectedUsersToClients();
+        }
     });
+
+    sendConnectedUsersToClients();
 });
 
 // Routers
