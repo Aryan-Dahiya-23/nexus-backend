@@ -92,7 +92,7 @@ io.on('connection', (socket) => {
         }
     });
 
-    sendConnectedUsersToClients();
+    // sendConnectedUsersToClients();
 });
 
 // Routers
