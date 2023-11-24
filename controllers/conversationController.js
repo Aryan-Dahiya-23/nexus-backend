@@ -146,6 +146,7 @@ export const createMessage = async (req, res) => {
         conversation.lastMessage = newMessage._id;
 
         await conversation.save();
+        nodeCache.del(conversationId);
 
         return res.status(200).json({ message: "Message created successfully" });
     } catch (error) {
@@ -165,6 +166,7 @@ export const readMessages = async (req, res) => {
         if (String(message.senderId) !== String(userId) && !message.seenBy.includes(String(userId))) {
             message.seenBy.push(userId);
             await message.save();
+            nodeCache.del(conversationId);
         }
         console.log(message.seenBy);
 
