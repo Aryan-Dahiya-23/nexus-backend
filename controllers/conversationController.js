@@ -1,13 +1,23 @@
 import User from "../models/User.js";
 import Conversation from "../models/Conversation.js";
 import Message from "../models/Message.js";
+import NodeCache from 'node-cache';
+const conversationCache = new NodeCache();
 
 export const getConversation = async (req, res) => {
     try {
         const { conversationId } = req.params;
         const { userId } = req.query;
 
-        const conversation = await Conversation.findById(conversationId).lean()
+        const cachedConversation = conversationCache.get(conversationId);
+        if (cachedConversation) {
+            console.log('Conversation found in cache!');
+            res.json(cachedConversation);
+            return;
+        }
+
+        const conversation = await Conversation.findById(conversationId)
+            .lean()
             .populate({
                 path: 'participants',
                 model: 'User',
@@ -30,12 +40,50 @@ export const getConversation = async (req, res) => {
             })
             .exec();
 
+        conversationCache.set(conversationId, conversation);
+
         res.json(conversation);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 }
+
+
+// export const getConversation = async (req, res) => {
+//     try {
+//         const { conversationId } = req.params;
+//         const { userId } = req.query;
+
+//         const conversation = await Conversation.findById(conversationId).lean()
+//             .populate({
+//                 path: 'participants',
+//                 model: 'User',
+//                 select: 'fullName picture',
+//                 match: { _id: { $ne: userId } }
+//             })
+//             .populate({
+//                 path: 'messages',
+//                 model: 'Message',
+//                 populate: {
+//                     path: 'senderId',
+//                     model: 'User',
+//                     select: 'fullName picture',
+//                 }
+//             })
+//             .populate({
+//                 path: 'lastMessage',
+//                 model: 'Message',
+//                 select: 'content senderId seenBy'
+//             })
+//             .exec();
+
+//         res.json(conversation);
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ error: 'Internal Server Error' });
+//     }
+// }
 
 export const createConversation = async (req, res) => {
     try {

@@ -8,6 +8,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import passport from "passport";
+import NodeCache from "node-cache";
 import { connectToDatabase } from "./config/database.js";
 import authRouter from "./routes/auth.js"
 import conversationRouter from "./routes/conversation.js"
@@ -17,6 +18,7 @@ import User from "./models/User.js";
 dotenv.config();
 
 const app = express();
+const nodeCache = new NodeCache();
 // const server = http.createServer(app);
 
 const origin = process.env.CLIENT_URL
