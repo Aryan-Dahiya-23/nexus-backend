@@ -31,7 +31,7 @@ const io = new Server(server, {
 
 app.use(
     session({
-        secret: "your-secret",
+        secret: process.env.SECRET_KEY,
         resave: false,
         saveUninitialized: false,
 
