@@ -19,7 +19,7 @@ export const verify = async (req, res) => {
                         {
                             path: 'lastMessage',
                             model: 'Message',
-                            select: 'content createdAt seenBy'
+                            select: 'content type seenBy createdAt'
                         }
                     ]
                 })
