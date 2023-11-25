@@ -65,14 +65,14 @@ const sendConnectedUsersToClients = () => {
 };
 
 io.on('connection', (socket) => {
-    console.log('a user connected');
+    // console.log('a user connected');
 
     socket.on('user connected', (userId) => {
-        console.log(`User with ID ${userId} connected`);
+        // console.log(`User with ID ${userId} connected`);
         connectedUsers.set(socket.id, userId);
         sendConnectedUsersToClients();
 
-        console.log(connectedUsers);
+        // console.log(connectedUsers);
     });
 
     socket.on('chat message', (userId, newMessage, conversationId) => {
@@ -87,9 +87,9 @@ io.on('connection', (socket) => {
 
         const userId = connectedUsers.get(socket.id);
         if (userId) {
-            console.log(`User with ID ${userId} disconnected`);
+            // console.log(`User with ID ${userId} disconnected`);
             connectedUsers.delete(socket.id);
-            console.log(connectedUsers);
+            // console.log(connectedUsers);
             sendConnectedUsersToClients();
         }
     });
