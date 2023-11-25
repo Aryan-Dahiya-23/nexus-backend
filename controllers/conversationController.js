@@ -134,9 +134,6 @@ export const createConversation = async (req, res) => {
 }
 
 export const createMessage = async (req, res) => {
-
-    console.log(req.body.message);
-
     try {
         const { conversationId } = req.params;
         const { message } = req.body;
@@ -153,7 +150,7 @@ export const createMessage = async (req, res) => {
 
         return res.status(200).json({ message: "Message created successfully" });
     } catch (error) {
-        // console.log(error);
+        console.log(error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 }
