@@ -7,6 +7,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import session from "express-session";
+import morgan from "morgan";
 import passport from "passport";
 import NodeCache from "node-cache";
 import { connectToDatabase } from "./config/database.js";
@@ -19,7 +20,6 @@ dotenv.config();
 
 const app = express();
 const nodeCache = new NodeCache();
-// const server = http.createServer(app);
 
 const origin = process.env.CLIENT_URL
 const server = createServer(app);
@@ -46,6 +46,7 @@ app.use(
 
 app.use(cors({ credentials: true, origin: origin }));
 app.use(express.json());
+app.use(morgan("dev"));
 app.use(bodyParser.json({ extended: true }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
