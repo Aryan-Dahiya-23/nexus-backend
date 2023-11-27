@@ -71,16 +71,20 @@ io.on('connection', (socket) => {
         // console.log(`User with ID ${userId} connected`);
         connectedUsers.set(socket.id, userId);
         sendConnectedUsersToClients();
-        console.log(connectedUsers);
+        // console.log(connectedUsers);
     });
 
     socket.on('chat message', (receiverIds, newMessage, conversationId) => {
-        console.log(receiverIds, newMessage);
+        // console.log("Receiver Ids: ", receiverIds);
+        // console.log("Message: ", newMessage);
+
+        console.log(receiverIds);
         receiverIds.forEach(receiverId => {
+
             const userSocket = Array.from(io.sockets.sockets.values()).find(s => connectedUsers.get(s.id) === receiverId);
 
             if (userSocket) {
-                console.log('emitting');
+                // console.log('emitting');
                 userSocket.emit('chat message', newMessage, conversationId);
             }
         });
