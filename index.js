@@ -68,17 +68,19 @@ const sendConnectedUsersToClients = () => {
 io.on('connection', (socket) => {
 
     socket.on('user connected', (userId) => {
-        console.log(`User with ID ${userId} connected`);
+        // console.log(`User with ID ${userId} connected`);
         connectedUsers.set(socket.id, userId);
         sendConnectedUsersToClients();
         console.log(connectedUsers);
     });
 
     socket.on('chat message', (receiverIds, newMessage, conversationId) => {
+        console.log(receiverIds, newMessage);
         receiverIds.forEach(receiverId => {
             const userSocket = Array.from(io.sockets.sockets.values()).find(s => connectedUsers.get(s.id) === receiverId);
 
             if (userSocket) {
+                console.log('emitting', userSocket);
                 userSocket.emit('chat message', newMessage, conversationId);
             }
         });
@@ -98,7 +100,7 @@ io.on('connection', (socket) => {
 
         const userId = connectedUsers.get(socket.id);
         if (userId) {
-            console.log(`User with ID ${userId} disconnected`);
+            // console.log(`User with ID ${userId} disconnected`);
             connectedUsers.delete(socket.id);
             console.log(connectedUsers);
             sendConnectedUsersToClients();
