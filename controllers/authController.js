@@ -8,7 +8,7 @@ export const verify = async (req, res) => {
             const user = await User.findById(userId).lean()
                 .populate({
                     path: 'conversations.conversation',
-                    select: 'participants lastMessage',
+                    select: 'type name participants lastMessage',
                     populate: [
                         {
                             path: 'participants',
@@ -19,7 +19,7 @@ export const verify = async (req, res) => {
                         {
                             path: 'lastMessage',
                             model: 'Message',
-                            select: 'content type seenBy createdAt'
+                            select: 'content type name seenBy createdAt'
                         }
                     ]
                 })

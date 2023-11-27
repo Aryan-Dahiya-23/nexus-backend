@@ -46,7 +46,7 @@ app.use(
 
 app.use(cors({ credentials: true, origin: origin }));
 app.use(express.json());
-app.use(morgan("dev"));
+// app.use(morgan("dev"));
 app.use(bodyParser.json({ extended: true }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
