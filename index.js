@@ -80,7 +80,7 @@ io.on('connection', (socket) => {
             const userSocket = Array.from(io.sockets.sockets.values()).find(s => connectedUsers.get(s.id) === receiverId);
 
             if (userSocket) {
-                console.log('emitting', userSocket);
+                console.log('emitting');
                 userSocket.emit('chat message', newMessage, conversationId);
             }
         });
