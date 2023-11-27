@@ -58,6 +58,62 @@ app.enable("trust proxy");
 
 connectToDatabase(process.env.MONGO_URL);
 
+// const connectedUsers = new Map();
+
+// const sendConnectedUsersToClients = () => {
+//     const connectedUserIds = Array.from(connectedUsers.values());
+//     io.emit('connected users', connectedUserIds);
+// };
+
+// io.on('connection', (socket) => {
+
+//     socket.on('user connected', (userId) => {
+//         // console.log(`User with ID ${userId} connected`);
+//         connectedUsers.set(socket.id, userId);
+//         sendConnectedUsersToClients();
+//         // console.log(connectedUsers);
+//     });
+
+//     socket.on('chat message', (receiverIds, newMessage, conversationId) => {
+//         // console.log("Receiver Ids: ", receiverIds);
+//         // console.log("Message: ", newMessage);
+
+//         console.log(receiverIds);
+//         receiverIds.forEach(receiverId => {
+
+//             const userSocket = Array.from(io.sockets.sockets.values()).find(s => connectedUsers.get(s.id) === receiverId);
+
+//             if (userSocket) {
+//                 console.log("emiting to: ", receiverId);
+//                 userSocket.emit('chat message', newMessage, conversationId);
+//             }
+//         });
+
+//     });
+
+//     socket.on('seen message', (receiverId, conversationId) => {
+//         const userSocket = Array.from(io.sockets.sockets.values()).find(s => connectedUsers.get(s.id) === receiverId);
+
+//         if (userSocket) {
+//             userSocket.emit('seen message', conversationId);
+//         } else {
+//             console.log(`User with ID ${receiverId} is not connected.`);
+//         }
+//     });
+
+//     socket.on('disconnect', () => {
+
+//         const userId = connectedUsers.get(socket.id);
+//         if (userId) {
+//             // console.log(`User with ID ${userId} disconnected`);
+//             connectedUsers.delete(socket.id);
+//             console.log(connectedUsers);
+//             sendConnectedUsersToClients();
+//         }
+//     });
+// });
+
+
 const connectedUsers = new Map();
 
 const sendConnectedUsersToClients = () => {
@@ -66,53 +122,42 @@ const sendConnectedUsersToClients = () => {
 };
 
 io.on('connection', (socket) => {
-
     socket.on('user connected', (userId) => {
-        // console.log(`User with ID ${userId} connected`);
         connectedUsers.set(socket.id, userId);
         sendConnectedUsersToClients();
-        // console.log(connectedUsers);
     });
 
     socket.on('chat message', (receiverIds, newMessage, conversationId) => {
-        // console.log("Receiver Ids: ", receiverIds);
-        // console.log("Message: ", newMessage);
-
-        console.log(receiverIds);
         receiverIds.forEach(receiverId => {
+            const userSocketId = Array.from(connectedUsers.entries())
+                .find(([socketId, userId]) => userId === receiverId)?.[0];
 
-            const userSocket = Array.from(io.sockets.sockets.values()).find(s => connectedUsers.get(s.id) === receiverId);
-
-            if (userSocket) {
-                console.log("emiting to: ", receiverId);
-                userSocket.emit('chat message', newMessage, conversationId);
+            if (userSocketId) {
+                io.to(userSocketId).emit('chat message', newMessage, conversationId);
             }
         });
-
-        // io.emit("chat message", newMessage, conversationId);
     });
 
     socket.on('seen message', (receiverId, conversationId) => {
-        const userSocket = Array.from(io.sockets.sockets.values()).find(s => connectedUsers.get(s.id) === receiverId);
+        const userSocketId = Array.from(connectedUsers.entries())
+            .find(([socketId, userId]) => userId === receiverId)?.[0];
 
-        if (userSocket) {
-            userSocket.emit('seen message', conversationId);
+        if (userSocketId) {
+            io.to(userSocketId).emit('seen message', conversationId);
         } else {
             console.log(`User with ID ${receiverId} is not connected.`);
         }
     });
 
     socket.on('disconnect', () => {
-
         const userId = connectedUsers.get(socket.id);
         if (userId) {
-            // console.log(`User with ID ${userId} disconnected`);
             connectedUsers.delete(socket.id);
-            console.log(connectedUsers);
             sendConnectedUsersToClients();
         }
     });
 });
+
 
 // Routers
 app.use('/auth', authRouter);
