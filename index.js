@@ -128,6 +128,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('chat message', (receiverIds, newMessage, conversationId) => {
+        console.log(receiverIds, newMessage, conversationId);
         receiverIds.forEach(receiverId => {
             const userSocketId = Array.from(connectedUsers.entries())
                 .find(([socketId, userId]) => userId === receiverId)?.[0];
