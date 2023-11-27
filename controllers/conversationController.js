@@ -12,10 +12,10 @@ export const getConversation = async (req, res) => {
         let conversation;
 
         if (nodeCache.has(conversationId)) {
-            console.log('conversation cached');
+            // console.log('conversation cached');
             conversation = nodeCache.get(conversationId);
         } else {
-            console.log('not cached');
+            // console.log('not cached');
             conversation = await Conversation.findById(conversationId).lean()
                 .populate({
                     path: 'participants',
@@ -155,13 +155,12 @@ export const readMessages = async (req, res) => {
         const conversation = await Conversation.findById(conversationId);
         const message = await Message.findById(conversation.lastMessage);
 
-        if (String(message.senderId) !== String(userId) && !message.seenBy.includes(String(userId))) {
+        if (message.senderId !== userId && !message.seenBy.includes(userId)) {
             message.seenBy.push(userId);
             await message.save();
             nodeCache.del(conversationId);
         }
-        console.log(message.seenBy);
-
+        console.log(message);
         res.status(200).json({ message });
     } catch (error) {
         console.error(error);

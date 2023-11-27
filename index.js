@@ -66,23 +66,33 @@ const sendConnectedUsersToClients = () => {
 };
 
 io.on('connection', (socket) => {
-    // console.log('a user connected');
 
     socket.on('user connected', (userId) => {
         console.log(`User with ID ${userId} connected`);
         connectedUsers.set(socket.id, userId);
         sendConnectedUsersToClients();
-
         console.log(connectedUsers);
     });
 
-    socket.on('chat message', (userId, newMessage, conversationId) => {
-        io.emit('chat message', userId, newMessage, conversationId);
+    socket.on('chat message', (receiverIds, newMessage, conversationId) => {
+        receiverIds.forEach(receiverId => {
+            const userSocket = Array.from(io.sockets.sockets.values()).find(s => connectedUsers.get(s.id) === receiverId);
+
+            if (userSocket) {
+                userSocket.emit('chat message', newMessage, conversationId);
+            }
+        });
     });
 
-    socket.on('seen message', (conversationId) => {
-        io.emit('seen message', conversationId);
-    })
+    socket.on('seen message', (receiverId, conversationId) => {
+        const userSocket = Array.from(io.sockets.sockets.values()).find(s => connectedUsers.get(s.id) === receiverId);
+
+        if (userSocket) {
+            userSocket.emit('seen message', conversationId);
+        } else {
+            console.log(`User with ID ${receiverId} is not connected.`);
+        }
+    });
 
     socket.on('disconnect', () => {
 
