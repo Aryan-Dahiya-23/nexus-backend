@@ -79,15 +79,16 @@ io.on('connection', (socket) => {
         // console.log("Message: ", newMessage);
 
         console.log(receiverIds);
-        receiverIds.forEach(receiverId => {
+        // receiverIds.forEach(receiverId => {
 
-            const userSocket = Array.from(io.sockets.sockets.values()).find(s => connectedUsers.get(s.id) === receiverId);
+        //     const userSocket = Array.from(io.sockets.sockets.values()).find(s => connectedUsers.get(s.id) === receiverId);
 
-            if (userSocket) {
-                // console.log('emitting');
-                userSocket.emit('chat message', newMessage, conversationId);
-            }
-        });
+        //     if (userSocket) {
+        //         userSocket.emit('chat message', newMessage, conversationId);
+        //     }
+        // });
+
+        io.emit("chat message", newMessage, conversationId);
     });
 
     socket.on('seen message', (receiverId, conversationId) => {
