@@ -83,6 +83,10 @@ io.on('connection', (socket) => {
         io.emit('message sent', userId, conversationId);
     });
 
+    socket.on('seen message', (receiverId, conversationId) => {
+       io.emit(‘seen message’, conversationId);
+    });
+
     socket.on('disconnect', () => {
 
         const userId = connectedUsers.get(socket.id);
