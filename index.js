@@ -84,7 +84,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('seen message', (receiverId, conversationId) => {
-       io.emit(‘seen message’, conversationId);
+       io.emit('seen message’, conversationId);
     });
 
     socket.on('disconnect', () => {
