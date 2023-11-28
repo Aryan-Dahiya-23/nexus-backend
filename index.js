@@ -75,7 +75,6 @@ io.on('connection', (socket) => {
     });
 
     socket.on('chat message', (userId, newMessage, conversationId) => {
-        console.log(userId, newMessage, conversationId);
         io.emit('chat message', userId, newMessage, conversationId);
     });
 
@@ -83,8 +82,8 @@ io.on('connection', (socket) => {
         io.emit('message sent', userId, conversationId);
     });
 
-    socket.on('seen message', (receiverId, conversationId) => {
-    io.emit('seen message', conversationId);
+    socket.on('seen message', (conversationId) => {
+        io.emit('seen message', conversationId);
     });
 
     socket.on('disconnect', () => {
