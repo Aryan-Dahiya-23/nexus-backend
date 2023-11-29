@@ -9,6 +9,6 @@ router.get("/:conversationId", getConversation);
 router.post("/create-conversation", createConversation);
 router.post("/create-group-conversation", createGroupConversation);
 router.post("/create-message/:conversationId", createMessage);
-router.post("/read-conversation/:conversationId", readMessages);
+router.put("/read-conversation/:conversationId", readMessages);
 
 export default router;

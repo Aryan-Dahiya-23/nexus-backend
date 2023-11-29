@@ -160,7 +160,6 @@ export const readMessages = async (req, res) => {
             await message.save();
             nodeCache.del(conversationId);
         }
-        // console.log(message);
         res.status(200).json({ message });
     } catch (error) {
         console.error(error);
