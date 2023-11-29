@@ -12,10 +12,10 @@ export const getConversation = async (req, res) => {
         let conversation;
 
         if (nodeCache.has(conversationId)) {
-            // console.log('conversation cached');
+            console.log('conversation cached');
             conversation = nodeCache.get(conversationId);
         } else {
-            // console.log('not cached');
+            console.log('not cached');
             conversation = await Conversation.findById(conversationId).lean()
                 .populate({
                     path: 'participants',
