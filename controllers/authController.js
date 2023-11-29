@@ -68,6 +68,17 @@ export const verify = async (req, res) => {
     }
 }
 
+export const people = async (req, res) => {
+    const userId = req.query.userId;
+    try {
+        const people = await User.find({ _id: { $ne: userId } });
+        res.json(people);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+}
+
 export const logout = async (req, res) => {
     req.logout((err) => {
         if (err) {

@@ -1,5 +1,4 @@
 import express from "express";
-import http from "http";
 import { createServer } from 'node:http';
 import { Server } from "socket.io";
 import bodyParser from "body-parser";
@@ -7,19 +6,16 @@ import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import session from "express-session";
-import morgan from "morgan";
 import passport from "passport";
-import NodeCache from "node-cache";
 import { connectToDatabase } from "./config/database.js";
+import initializeChatSockets from "./sockets/chatSockets.js";
+import "./config/passport.js"
 import authRouter from "./routes/auth.js"
 import conversationRouter from "./routes/conversation.js"
-import "./config/passport.js"
-import User from "./models/User.js";
 
 dotenv.config();
 
 const app = express();
-const nodeCache = new NodeCache();
 
 const origin = process.env.CLIENT_URL
 const server = createServer(app);
@@ -46,7 +42,6 @@ app.use(
 
 app.use(cors({ credentials: true, origin: origin }));
 app.use(express.json());
-// app.use(morgan("dev"));
 app.use(bodyParser.json({ extended: true }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -58,60 +53,55 @@ app.enable("trust proxy");
 
 connectToDatabase(process.env.MONGO_URL);
 
-const connectedUsers = new Map();
+initializeChatSockets(io);
 
-const sendConnectedUsersToClients = () => {
-    const connectedUserIds = Array.from(connectedUsers.values());
-    io.emit('connected users', connectedUserIds);
-};
+// const connectedUsers = new Map();
 
-io.on('connection', (socket) => {
+// const sendConnectedUsersToClients = () => {
+//     const connectedUserIds = Array.from(connectedUsers.values());
+//     io.emit('connected users', connectedUserIds);
+// };
 
-    socket.on('user connected', (userId) => {
-        console.log(`User with ID ${userId} connected`);
-        connectedUsers.set(socket.id, userId);
-        sendConnectedUsersToClients();
-        console.log(connectedUsers);
-    });
+// io.on('connection', (socket) => {
 
-    socket.on('chat message', (userId, newMessage, conversationId) => {
-        io.emit('chat message', userId, newMessage, conversationId);
-    });
+//     socket.on('user connected', (userId) => {
+//         console.log(`User with ID ${userId} connected`);
+//         connectedUsers.set(socket.id, userId);
+//         sendConnectedUsersToClients();
+//         console.log(connectedUsers);
+//     });
 
-    socket.on('message sent', (userId, conversationId) => {
-        io.emit('message sent', userId, conversationId);
-    });
+//     socket.on('chat message', (userId, newMessage, conversationId) => {
+//         io.emit('chat message', userId, newMessage, conversationId);
+//     });
 
-    socket.on('seen message', (conversationId) => {
-        io.emit('seen message', conversationId);
-    });
+//     socket.on('message sent', (userId, conversationId) => {
+//         io.emit('message sent', userId, conversationId);
+//     });
 
-    socket.on('disconnect', () => {
+//     socket.on('seen message', (conversationId) => {
+//         io.emit('seen message', conversationId);
+//     });
 
-        const userId = connectedUsers.get(socket.id);
-        if (userId) {
-            console.log(`User with ID ${userId} disconnected`);
-            connectedUsers.delete(socket.id);
-            console.log(connectedUsers);
-            sendConnectedUsersToClients();
-        }
-    });
-});
+//     socket.on('new conversation', (userId) => {
+//         io.emit('new conversation', userId);
+//     })
+
+//     socket.on('disconnect', () => {
+
+//         const userId = connectedUsers.get(socket.id);
+//         if (userId) {
+//             console.log(`User with ID ${userId} disconnected`);
+//             connectedUsers.delete(socket.id);
+//             console.log(connectedUsers);
+//             sendConnectedUsersToClients();
+//         }
+//     });
+// });
 
 // Routers
 app.use('/auth', authRouter);
 app.use('/conversation', conversationRouter);
-
-app.get("/people", async (req, res) => {
-    const userId = req.query.userId;
-    try {
-        const people = await User.find({ _id: { $ne: userId } });
-        res.json(people);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
 
 app.get("/", (req, res) => {
     res.send("Hello Live Chat App");
