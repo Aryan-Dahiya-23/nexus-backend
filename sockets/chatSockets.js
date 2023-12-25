@@ -32,11 +32,17 @@ const initializeChatSockets = (io) => {
         })
 
         socket.on('video call', (name, avatarSrc, userId, id) => {
-            // socket.broadcast.to(socket.room).emit('receive video call invitation', name, avatarSrc, id);
-
-            console.log(avatarSrc);
             io.emit('video call', name, avatarSrc, userId, id);
         })
+
+        socket.on('accept video call', (userId, id) => {
+            const callerSocketId = Array.from(connectedUsers.entries())
+                .find(([socketId, connectedUserId]) => connectedUserId === userId)?.[0];
+
+            if (callerSocketId) {
+                io.to(callerSocketId).emit('accept video call', id);
+            }
+        });
 
         socket.on('disconnect', () => {
             const userId = connectedUsers.get(socket.id);
