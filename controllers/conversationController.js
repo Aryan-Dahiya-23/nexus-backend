@@ -166,3 +166,24 @@ export const readMessages = async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 }
+
+export const deleteConversation = async (req, res) => {
+    const { userId, conversationId } = req.params;
+
+    try {
+        const updatedUser = await User.findOneAndUpdate(
+            { _id: userId },
+            { $pull: { conversations: { conversation: conversationId } } },
+            { new: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.json({ message: 'Conversation removed successfully' });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+}
