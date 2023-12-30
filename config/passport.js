@@ -6,40 +6,6 @@ import User from "../models/User.js";
 
 dotenv.config();
 
-// passport.use(
-//     new GoogleStrategy(
-//         {
-//             clientID: process.env.GOOGLE_CLIENT_ID,
-//             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-//             callbackURL: process.env.GOOGLE_CALLBACK_URL,
-//             passReqToCallback: true,
-//             scope: ["profile", "email"]
-//         },
-//         async (req, accessToken, refreshToken, profile, cb) => {
-//             const defaultUser = {
-//                 fullName: `${profile.name.givenName} ${profile.name.familyName}`,
-//                 email: profile.emails[0].value,
-//                 picture: profile.photos[0].value,
-//                 googleId: profile.id,
-//             };
-
-//             try {
-//                 const user = await User.findOne({ googleId: profile.id });
-
-//                 if (!user) {
-//                     const newUser = await User.create(defaultUser);
-//                     cb(null, newUser);
-//                 } else {
-//                     cb(null, user);
-//                 }
-//             } catch (err) {
-//                 console.log("Error during Google authentication:", err);
-//                 cb(err, null);
-//             }
-//         }
-//     )
-// );
-
 passport.use(
     new GoogleStrategy(
         {
@@ -59,8 +25,7 @@ passport.use(
 
             try {
                 const user = await User.findOne({ email: defaultUser.email });
-                
-                // console.log(user);
+
                 if (!user) {
                     const newUser = await User.create(defaultUser);
                     cb(null, newUser);
@@ -105,7 +70,7 @@ passport.use(
                 } else {
                     user.facebookId = profile.id;
                     user.picture = profile.photos[0].value,
-                        await user.save();
+                    await user.save();
                     cb(null, user);
                 }
             } catch (err) {
