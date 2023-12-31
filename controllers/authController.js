@@ -4,7 +4,7 @@ export const verify = async (req, res) => {
     try {
         if (req.isAuthenticated()) {
             const userId = req.user._id;
-
+ 
             const user = await User.findById(userId).lean()
                 .populate({
                     path: 'conversations.conversation',

@@ -38,8 +38,7 @@ export const getConversation = async (req, res) => {
                     select: 'content senderId seenBy'
                 })
                 .exec();
-
-            nodeCache.set(conversationId, conversation);
+            nodeCache.set(conversationId, conversation, 1000);
         }
 
         res.json(conversation);
