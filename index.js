@@ -59,6 +59,10 @@ initializeChatSockets(io);
 app.use('/auth', authRouter);
 app.use('/conversation', conversationRouter);
 
+setInterval(() => {
+  console.log("hey");
+}, 100000);
+
 app.get("/", (req, res) => {
     res.send("Hello Live Chat App");
 });
